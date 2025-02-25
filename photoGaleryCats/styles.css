@@ -1,0 +1,38 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: sans-serif;
+  background-color: #f5f6;
+}
+
+.header {
+  text-align: center;
+  text-transform: uppercase;
+  padding: 32px;
+  color: #fff;
+  border-bottom: 4px solid #aa336a;
+  background-color: #ff55b4;
+}
+
+.gallery {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px 10px;
+}
+
+.gallery img {
+  width: 100%;
+  max-width: 350px;
+  height: 350px;
+  object-fit: cover; /* Esto es para que se puede quedar al 100 del contenedor sin que se pierda la textura de la imagen osea que no se vea estirada */
+  border-radius: 10px;
+}

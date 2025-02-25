@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Survey Form</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="header">
+      <h1 id="title">FreeCodeCamp Survey Form</h1>
+      <p id="description">
+        Thank you for taking the time to help us improve the platform
+      </p>
+    </header>
+
+    <form id="survey-form">
+      <div class="container">
+        <label for="name" id="name-label"
+          >Name
+          <input
+            required
+            name="name"
+            id="name"
+            type="text"
+            placeholder="Insert a name"
+          />
+        </label>
+      </div>
+
+      <div class="container">
+        <label for="email" id="email-label"
+          >Email
+          <input
+            required
+            type="email"
+            id="email"
+            name="email"
+            placeholder="example@example.com"
+          />
+        </label>
+      </div>
+
+      <div class="container">
+        <label for="number" id="number-label"
+          >Age
+          <span>(optional)</span>
+          <input type="number" id="number" name="number" min="8" max="80" />
+        </label>
+      </div>
+
+      <div class="container">
+        <p>Which option best describes your current role?</p>
+        <select name="role" id="dropdown">
+          <option value="">Select current role</option>
+          <option value="student">Student</option>
+          <option value="job">Full Time Job</option>
+          <option value="learner">Full Time Learner</option>
+          <option value="notSay">Prefer not to say</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+
+      <p>Would you recommend freeCodeCamp to a friend?</p>
+      <label for="def">
+        <input type="radio" name="recommend" id="def" value="def" />
+        Definitely</label
+      >
+      <label for="may">
+        <input type="radio" name="recommend" id="may" value="may" />
+        Maybe</label
+      >
+      <label for="not">
+        <input type="radio" name="recommend" id="not" checked value="not" /> Not
+        sure</label
+      >
+
+      <p>
+        What would you like to see improved? <span>(Check all that apply)</span>
+      </p>
+      <label for="check1">
+        <input type="checkbox" name="check1" id="check1" value="front" />
+        Front-end Projects</label
+      >
+      <label for="check2">
+        <input type="checkbox" name="check2" id="check2" value="back" />
+        Back-end Projects</label
+      >
+      <label for="check3">
+        <input type="checkbox" name="check3" id="check3" value="data" /> Data
+        Visualization</label
+      >
+      <label for="check4">
+        <input type="checkbox" name="check4" id="check4" value="challenge" />
+        Challenges</label
+      >
+      <label for="check5">
+        <input type="checkbox" name="check5" id="check5" value="open" /> Open
+        Source Community</label
+      >
+      <label for="chekc6">
+        <input type="checkbox" name="check6" id="check6" value="gitter" />
+        Gitter help rooms</label
+      >
+      <label for="check7">
+        <input type="checkbox" name="check7" id="check7" value="videos" />
+        Videos</label
+      >
+      <label for="check8">
+        <input type="checkbox" name="check8" id="check8" value="city" /> City
+        Meetups</label
+      >
+      <label for="check9">
+        <input type="checkbox" name="check9" id="check9" value="wiki" /> Wiki
+      </label>
+      <label for="check10">
+        <input type="checkbox" name="check10" id="check10" value="forum" />
+        Forum</label
+      >
+      <label for="check11">
+        <input type="checkbox" name="check11" id="check11" value="additional" />
+        Additional Course</label
+      >
+
+      <label for="suggestions">Any comments or suggestions</label>
+      <textarea
+        name="suggestions"
+        id="suggestions"
+        cols="30"
+        rows="10"
+      ></textarea>
+
+      <input id="submit" type="submit" value="submit" />
+    </form>
+  </body>
+</html>

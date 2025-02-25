@@ -1,0 +1,12 @@
+body {
+  margin: 0;
+  font-size: 1.4rem;
+  font-family: "Times New Roman", Times, serif;
+  color: whitesmoke;
+  font-weight: 400;
+  background-color: #050301;
+}
+
+.header {
+  text-align: center;
+}
