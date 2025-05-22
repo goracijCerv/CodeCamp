@@ -1,0 +1,52 @@
+<html>
+  <head>
+    <title>Callback</title>
+  </head>
+  <body>
+    <h2>Bienvenido, ¡has iniciado sesión!</h2>
+    <div id="userInfo"></div>
+
+    <script>
+      const clientId = "TU_CLIENT_ID";
+      const redirectUri = "https://localhost:5500/callback"; // Debe coincidir con lo registrado en Okta
+      const tokenEndpoint =
+        "https://dev-86649605.okta.com/oauth2/default/v1/token";
+      const code = new URLSearchParams(window.location.search).get("code");
+      const codeVerifier = sessionStorage.getItem("code_verifier");
+
+      if (code) {
+        // Intercambiar el código por tokens
+        fetch(tokenEndpoint, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body: new URLSearchParams({
+            grant_type: "authorization_code",
+            code: code,
+            redirect_uri: redirectUri,
+            client_id: clientId,
+            code_verifier: codeVerifier,
+          }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            console.log(data); // Aquí puedes ver los tokens
+            const idToken = data.id_token;
+            const accessToken = data.access_token;
+
+            // Mostrar info del usuario (ejemplo)
+            document.getElementById(
+              "userInfo"
+            ).innerHTML = `ID Token: ${idToken}`;
+            sessionStorage.setItem("id_token", idToken);
+            sessionStorage.setItem("access_token", accessToken);
+          })
+          .catch((err) => console.error(err));
+      } else {
+        document.getElementById("userInfo").innerHTML =
+          "No se recibió código de autorización.";
+      }
+    </script>
+  </body>
+</html>

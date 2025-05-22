@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Okta Login Example with MFA</title>
+    <link
+      href="https://global.oktacdn.com/okta-signin-widget/7.6.1/css/okta-sign-in.min.css"
+      type="text/css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://global.oktacdn.com/okta-signin-widget/7.6.1/css/okta-theme.css"
+      type="text/css"
+      rel="stylesheet"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        margin: 20px;
+        background-color: #f4f4f4;
+        color: #333;
+      }
+      #widget-container {
+        background-color: #fff;
+        padding: 20px 40px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+      #user-info {
+        margin-top: 30px;
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background-color: #e9f5ff;
+        text-align: left;
+        max-width: 600px;
+        word-wrap: break-word;
+      }
+      #user-info h2 {
+        margin-top: 0;
+        color: #005cb9;
+      }
+      #logout-button {
+        background-color: #d9534f;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        margin-top: 15px;
+      }
+      #logout-button:hover {
+        background-color: #c9302c;
+      }
+      pre {
+        white-space: pre-wrap; /* Since CSS 2.1 */
+        white-space: -moz-pre-wrap; /* Mozilla, since 1999 */
+        white-space: -pre-wrap; /* Opera 4-6 */
+        white-space: -o-pre-wrap; /* Opera 7 */
+        word-wrap: break-word; /* Internet Explorer 5.5+ */
+        background-color: #f8f8f8;
+        padding: 10px;
+        border-radius: 4px;
+        border: 1px solid #eee;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Okta Sign-In Widget</h1>
+    <p>
+      If MFA is configured in Okta for your user/application, the widget will
+      prompt for it.
+    </p>
+
+    <div id="widget-container">
+      <div id="okta-login-container"></div>
+
+      <div id="user-info" style="display: none">
+        <h2>Welcome!</h2>
+        <p>You are logged in. Here is your ID token:</p>
+        <pre id="user-details"></pre>
+        <button id="logout-button">Logout</button>
+      </div>
+    </div>
+
+    <script
+      src="https://global.oktacdn.com/okta-signin-widget/7.6.1/js/okta-sign-in.min.js"
+      type="text/javascript"
+    ></script>
+
+    <script type="text/javascript">
+      // Initialize the Okta Sign-In Widget
+      const oktaSignIn = new OktaSignIn({
+        baseUrl: "https://dev-86649605.okta.com", // Your Okta domain
+        clientId: "", // Your Client ID from Okta application
+        redirectUri: "http://127.0.0.1:5500/", // Must be a registered redirect URI in your Okta app
+        authParams: {
+          pkce: true, // Proof Key for Code Exchange (PKCE) is recommended for SPAs
+          issuer: "https://dev-86649605.okta.com/oauth2/default", // Your Okta Authorization Server issuer
+          display: "page",
+          scopes: ["openid", "profile", "email"], // Standard OIDC scopes
+        },
+        useInteractionCodeFlow: true, // Recommended flow for SPAs
+        // features: {
+        //     // You can enable or disable widget features here if needed
+        //     // For example: selfServiceUnlock: true, registration: true (if configured in Okta)
+        // },
+        // The widget will automatically handle MFA challenges if policies are set in Okta.
+        // No specific MFA configuration is typically needed here in the client-side code.
+      });
+
+      // Function to display user information
+      function showUserInfo(tokens) {
+        const oktaLoginContainer = document.getElementById(
+          "okta-login-container"
+        );
+        const userInfoDiv = document.getElementById("user-info");
+        const userDetailsPre = document.getElementById("user-details");
+
+        if (oktaLoginContainer) oktaLoginContainer.style.display = "none"; // Hide login widget
+
+        if (userInfoDiv && userDetailsPre) {
+          // Display claims from the ID token
+          userDetailsPre.textContent = JSON.stringify(
+            tokens.idToken.claims,
+            null,
+            2
+          );
+          userInfoDiv.style.display = "block"; // Show user info
+        }
+      }
+
+      // Function to handle logout
+      async function handleLogout() {
+        try {
+          await oktaSignIn.authClient.signOut();
+          // Clear displayed user info
+          const userInfoDiv = document.getElementById("user-info");
+          if (userInfoDiv) userInfoDiv.style.display = "none";
+          const userDetailsPre = document.getElementById("user-details");
+          if (userDetailsPre) userDetailsPre.textContent = "";
+
+          // Show the login widget again
+          const oktaLoginContainer = document.getElementById(
+            "okta-login-container"
+          );
+          if (oktaLoginContainer) oktaLoginContainer.style.display = "block";
+
+          // Re-render the widget to ensure it's ready for a new login
+          renderWidget();
+        } catch (error) {
+          console.error("Logout error:", error);
+          alert("Error during logout. Check console for details.");
+        }
+      }
+
+      // Attach event listener for logout button if it exists
+      const logoutButton = document.getElementById("logout-button");
+      if (logoutButton) {
+        logoutButton.addEventListener("click", handleLogout);
+      }
+
+      // Main function to render the widget or handle existing session
+      async function renderWidget() {
+        try {
+          // Check if the page URL contains tokens (after a redirect from Okta)
+          // This is crucial for the redirect flow.
+          if (oktaSignIn.authClient.isLoginRedirect()) {
+            // Parse tokens from the redirect URL and store them.
+            // handleLoginRedirect will also remove the tokens from the URL.
+            await oktaSignIn.authClient.handleLoginRedirect();
+          }
+
+          // Check current authentication state
+          const isAuthenticated = await oktaSignIn.authClient.isAuthenticated();
+
+          if (isAuthenticated) {
+            const tokens = await oktaSignIn.authClient.tokenManager.getTokens();
+            console.log("User is already authenticated. Tokens:", tokens);
+            showUserInfo(tokens);
+          } else {
+            console.log("User is not authenticated. Rendering Sign-In Widget.");
+            // Ensure user info is hidden and login container is visible
+            const userInfoDiv = document.getElementById("user-info");
+            if (userInfoDiv) userInfoDiv.style.display = "none";
+            const oktaLoginContainer = document.getElementById(
+              "okta-login-container"
+            );
+            if (oktaLoginContainer) oktaLoginContainer.style.display = "block";
+
+            // Render the Okta Sign-In Widget
+            // The success callback is invoked after all authentication steps,
+            // including MFA, are completed.
+            oktaSignIn.renderEl(
+              { el: "#okta-login-container" },
+              function success(res) {
+                if (res.status === "SUCCESS") {
+                  // User has successfully authenticated (including MFA if required)
+                  console.log("Login successful, tokens received:", res.tokens);
+
+                  // Store tokens using the authClient's tokenManager
+                  oktaSignIn.authClient.tokenManager.setTokens(res.tokens);
+
+                  // Display user info
+                  showUserInfo(res.tokens);
+
+                  // OPTIONAL: Instead of showing info directly, you might redirect
+                  // to the main part of your application. If you redirect to the
+                  // same page (this page), the logic at the start of renderWidget()
+                  // will handle showing user info based on stored tokens.
+                  // window.location.href = "http://127.0.0.1:5500/"; // Example redirect
+                } else {
+                  // Handle other statuses if necessary (e.g., MFA_REQUIRED, MFA_CHALLENGE)
+                  // However, the widget usually handles these states internally and only
+                  // resolves to SUCCESS after all challenges are met.
+                  console.warn("Login status is not SUCCESS:", res.status, res);
+                }
+              },
+              function error(err) {
+                // This function is called if an error occurs during the sign-in process
+                console.error("Okta Sign-In Widget error:", err);
+                // You can display a user-friendly error message on the page
+                const oktaLoginContainer = document.getElementById(
+                  "okta-login-container"
+                );
+                if (oktaLoginContainer) {
+                  oktaLoginContainer.innerHTML =
+                    "<p style='color:red;'>An error occurred. Please try again. Check console for details.</p>";
+                }
+              }
+            );
+          }
+        } catch (error) {
+          console.error(
+            "Error during widget rendering or session check:",
+            error
+          );
+          // Fallback: try to render the widget if an unexpected error occurs
+          const userInfoDiv = document.getElementById("user-info");
+          if (userInfoDiv) userInfoDiv.style.display = "none";
+          const oktaLoginContainer = document.getElementById(
+            "okta-login-container"
+          );
+          if (oktaLoginContainer) {
+            oktaLoginContainer.style.display = "block";
+            oktaLoginContainer.innerHTML =
+              "<p style='color:red;'>Page load error. Attempting to show login. Check console.</p>";
+            // Attempt to render widget as a last resort
+            oktaSignIn.renderEl(
+              { el: "#okta-login-container" },
+              (res) => {
+                if (res.status === "SUCCESS") {
+                  oktaSignIn.authClient.tokenManager.setTokens(res.tokens);
+                  showUserInfo(res.tokens);
+                }
+              },
+              (err) => {
+                console.error("Fallback widget error:", err);
+              }
+            );
+          }
+        }
+      }
+
+      // Call the main function when the page loads
+      document.addEventListener("DOMContentLoaded", renderWidget);
+    </script>
+  </body>
+</html>
+<!-- 0oaopb8640kW29dJx5d7   ok azul-->

@@ -1,0 +1,73 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Okta Login Example</title>
+    <link
+      rel="stylesheet"
+      href="https://global.oktacdn.com/okta-signin-widget/7.6.1/css/okta-sign-in.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://global.oktacdn.com/okta-signin-widget/7.6.1/css/okta-theme.css"
+    />
+  </head>
+  <body>
+    <div id="okta-login-container"></div>
+
+    <script src="https://global.oktacdn.com/okta-signin-widget/7.6.1/js/okta-sign-in.min.js"></script>
+    <script>
+      const oktaSignIn = new OktaSignIn({
+        baseUrl: "https://dev-86649605.okta.com", // e.g. https://dev-123456.okta.com
+        clientId: ""//okta,
+        redirectUri: "http://127.0.0.1:5500/",
+        authParams: {
+          pkce: true,
+          issuer: "https://dev-86649605.okta.com/oauth2/default",
+        },
+        useInteractionCodeFlow: true,
+      });
+
+      oktaSignIn.renderEl(
+        { el: "#okta-login-container" },
+        function success(res) {
+          if (res.status === "SUCCESS") {
+            // With Interaction Code Flow, tokens are usually in res.tokens
+            if (res.tokens) {
+              console.log("Login successful, tokens received:", res.tokens);
+
+              // Store the tokens using the authClient's tokenManager
+              // setTokens will replace all existing tokens.
+              // If you want to add them individually:
+              // oktaSignIn.authClient.tokenManager.add('idToken', res.tokens.idToken);
+              // oktaSignIn.authClient.tokenManager.add('accessToken', res.tokens.accessToken);
+              // if (res.tokens.refreshToken) {
+              //   oktaSignIn.authClient.tokenManager.add('refreshToken', res.tokens.refreshToken);
+              // }
+              oktaSignIn.authClient.tokenManager.setTokens(res.tokens);
+
+              // Redirect to your application's desired page after login
+              // This could be the same page to clear Okta's response from the URL,
+              // or a protected route within your application.
+              // window.location.href = "http://127.0.0.1:5500/";
+            } else {
+              // This case would be unusual if status is SUCCESS with Interaction Code Flow
+              // and tokens were expected.
+              console.warn(
+                "Login successful, but no tokens found directly in response. Performing redirect.",
+                res
+              );
+              // If Okta already established its own session and you just need to redirect:
+              window.location.href = "http://127.0.0.1:5500/";
+            }
+          }
+        },
+        function error(err) {
+          console.error("Okta Sign-In Widget error:", err);
+          // You might want to display a user-friendly error message here
+        }
+      );
+    </script>
+  </body>
+</html>
